@@ -1,58 +1,63 @@
-"use strict"
-const Box = require("./box.js")
-const inquirer  =  require('inquirer');
-const info = require("./info.json")
-const { default: chalk } = require("chalk")
+#!/usr/bin/env node --no-warnings=ExperimentalWarning
+import Box from "./box.js";
+import inquirer from "inquirer";
+import info from './info.json' assert { type: 'json' };
+import chalk from "chalk";
 
 const response = chalk.white;
 
 const resumeOptions = {
-    type : "list",
-    name : "resumeOptions",
-    message : "What do you want to know?",
-    choices : [...Object.keys(info), "🔴 Exit"]
-}
+    type: "list",
+    name: "resumeOptions",
+    message: "What do you want to know?",
+    choices: [...Object.keys(info), "🔴 Exit"],
+};
 
-function showResume(){
+function showResume() {
     console.log(Box);
     handleResume();
 }
 
-function handleResume(){
-    inquirer.prompt(resumeOptions).then((ans)=>{
-        if(ans.resumeOptions == "Exit") return;
-
-        const options = info[`${ans.resumeOptions}`]
-        if(options){
-            if(ans.resumeOptions == "Projects"){
-                console.log(response(new inquirer.Separator()));
-                options.forEach((info)=>{
-                    console.log(response(" "+ info))
-                })
-                console.log(response(new inquirer.Separator()))
-            }else{
-                console.log(response(new inquirer.Separator()));
-                options.forEach((info)=>{
-                    console.log(response("📍",info))
-                })
-                console.log(response(new inquirer.Separator()))
+function handleResume() {
+    inquirer
+        .prompt(resumeOptions)
+        .then((ans) => {
+            if (ans.resumeOptions === "🔴 Exit") {
+                console.log(chalk.gray("──────────────"))
+                console.log("Thank you! 👍");
+                console.log(chalk.gray("──────────────"))
+                return;
             }
-        }
-    })
-    //Handling exit
-    inquirer.prompt({
-        type : "list",
-        name : "ExitBack",
-        message : "Anything you missed or Exit?",
-        choices : ["Back","Exit"],
-    }).then((choice)=>{
-        if(choice.exitBack == "Back"){
-            handleResume();
-        }else{
-            console.log("Thank you!👍");
-            return
-        }
-    })
-    .catch((e)=>console.log("Oops",e))
+
+            const options = info[ans.resumeOptions];
+            if (options) {
+                console.log(chalk.gray("──────────────"))
+                options.forEach((item) => {
+                    console.log(response("📍 " + item));
+                });
+                console.log(chalk.gray("──────────────"))
+            }
+
+            inquirer
+                .prompt({
+                    type: "list",
+                    name: "exitBack",
+                    message: "Anything else you want to explore or Exit?",
+                    choices: ["Back", "Exit"],
+                })
+                .then((choice) => {
+                    if (choice.exitBack === "Back") {
+                        handleResume();
+                    } else {
+                        console.log(chalk.gray("──────────────"))
+                        console.log("Thank you! 👍");
+                        console.log(chalk.gray("──────────────"))
+
+                        return;
+                    }
+                });
+        })
+        .catch((e) => {});
 }
-showResume()
+
+showResume();
